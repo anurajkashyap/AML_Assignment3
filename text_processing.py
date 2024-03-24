@@ -1,4 +1,6 @@
 def text_processing(text):
+    import re
+    import nltk
     # Convert text to lowercase
     text = text.lower()
 
