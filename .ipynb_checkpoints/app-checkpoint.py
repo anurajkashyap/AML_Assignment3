@@ -1,38 +1,33 @@
-from flask import Flask, request, render_template, url_for, redirect
-import pickle
-import score
+from flask import Flask, request, jsonify, render_template
+import pickle as pkl
+from text_processing import text_processing
 
 app = Flask(__name__)
 
-
 with open('logistic_regression.pkl', 'rb') as file:
-    model = pickle.load(file)
+    model = pkl.load(file)
+with open('tfidf_vectorizer.pkl', 'rb') as file:
+    vectorizer = pkl.load(file)
+ 
 
-threshold = 0.5
+def predict_text(text):
+    # We assume the text is already in the desired format for the model
+    text_features = vectorizer.transform([text_processing(text)]) 
+    print(model)
+    prediction = model.predict(text_features)
+    propensity = model.predict_proba(text_features)[0][1]  # Probability of the spam class
+    return {"prediction": str(prediction[0]), "propensity": float(propensity)}
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
+@app.route('/score', methods=['POST'])
+def score():
+    data = request.json
+    text = data.get('text', '')
+    result = predict_text(text)
+    return jsonify(result)
 
-'''def home():
-    return render_template('spam_page.html')'''
-
-
-@app.route("/")
-def spam():
-    # Get the input text from the form
-    txt = request.form['sent']
-    
-    # Get the prediction and propensity score using the pre-trained model
-    pred,prop = score.score(txt, model, threshold)
-    
-    # Determine the label based on the prediction
-    label = "Spam" if pred == 1 else "Not spam"
-    
-    # Generate the response message
-    ans = f"""The sentence "{txt}" is {label} with propensity {prop}."""
-    
-    # Render the result page with the response message
-    return render_template('result_page.html', ans = ans)
-
-if __name__ == '__main__': 
-    # Run the Flask app
-    app.run(debug=True, use_reloader=True)
+if __name__ == '__main__':
+    app.run(debug=True)
