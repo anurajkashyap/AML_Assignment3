@@ -74,9 +74,9 @@ def test_ham(model):
 
 
 # integration test function
-'''def test_flask():
+def test_flask():
     # Launch the Flask app using os.system
-    os.system('start /b python app.py')
+    os.system('python app.py')
 
     # Wait for the app to start up
     time.sleep(15)
@@ -90,4 +90,4 @@ def test_ham(model):
     assert type(response.text)== str
 
     # Shut down the Flask app using os.system
-    os.system('kill $(lsof -t -i:5000)')'''
+    os.system('kill $(lsof -t -i:5000)')
